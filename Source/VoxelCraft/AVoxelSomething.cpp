@@ -7,6 +7,8 @@
 #include "AVoxelSomething.h"
 
 // PolyVox
+#include "PolyVox/CubicSurfaceExtractor.h"
+#include "PolyVox/Mesh.h"
 using namespace PolyVox;
 
 // ANL
@@ -91,6 +93,9 @@ void AAVoxelSomething::BeginPlay()
 
 	// Finally create the mesh
 	Mesh->CreateMeshSection(0, Vertices, Indices, Normals, UV0, Colors, Tangents, true);
+
+	//set the material.
+	Mesh->SetMaterial(0, TerrainMaterial);
 }
 
 
@@ -133,7 +138,10 @@ void VoxelTerrainPager::pageIn(const PolyVox::Region& region, PagedVolume<Materi
 	{
 		for (int y = region.getLowerY(); y <= region.getUpperY(); y++)
 		{
-			for (int z = region.getLowerZ(); z <= region.getUpperZ(); z++) { // Evaluate the noise auto EvaluatedNoise = TerrainExecutor.evaluateScalar(x, y, z, PerturbGradient); MaterialDensityPair44 Voxel; bool bSolid = EvaluatedNoise > 0.5;
+			for (int z = region.getLowerZ(); z <= region.getUpperZ(); z++) { // Evaluate the noise 
+				auto EvaluatedNoise = TerrainExecutor.evaluateScalar(x, y, z, PerturbGradient);
+				MaterialDensityPair44 Voxel;
+				bool bSolid = EvaluatedNoise > 0.5;
 				Voxel.setDensity(bSolid ? 255 : 0);
 				Voxel.setMaterial(bSolid ? 1 : 0);
 

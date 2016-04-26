@@ -48,6 +48,9 @@ public:
 	// The maximum height of the generated terrain in voxels. NOTE: Changing this will affect where the ground begins!
 	UPROPERTY(Category = "Voxel Terrain", BlueprintReadWrite, EditAnywhere) float TerrainHeight;
 
+	// The material to apply to our voxel terrain
+	UPROPERTY(Category = "Voxel Terrain", BlueprintReadWrite, EditAnywhere) UMaterialInterface* TerrainMaterial;
+
 private:
 	TSharedPtr<PolyVox::PagedVolume<PolyVox::MaterialDensityPair44>> VoxelVolume;
 	
