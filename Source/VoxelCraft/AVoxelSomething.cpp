@@ -1,5 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+//THIS IS HTE IMPLIMENTATION FILE, BRANDON PLEASE.
+
+
 #include "VoxelCraft.h"
 #include "AVoxelSomething.h"
 
@@ -10,7 +13,7 @@ using namespace PolyVox;
 #include "VM/kernel.h"
 using namespace anl;
 
-// Sets default values
+// Sets default values -- THIS IS HTE CONSTRUCTOR
 AAVoxelSomething::AAVoxelSomething()
 {
 	// Default values for our noise control variables.
@@ -21,6 +24,8 @@ AAVoxelSomething::AAVoxelSomething()
 	NoiseOffset = 0.f;
 	TerrainHeight = 64.f;
 
+	// Initialize our mesh component
+	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Terrain Mesh"));
 }
 
 VoxelTerrainPager::VoxelTerrainPager(uint32 NoiseSeed, uint32 Octaves, float Frequency, float Scale, float Offset, float Height) : PagedVolume<MaterialDensityPair44>::Pager(), Seed(NoiseSeed), NoiseOctaves(Octaves), NoiseFrequency(Frequency), NoiseScale(Scale), NoiseOffset(Offset), TerrainHeight(Height)
@@ -29,7 +34,6 @@ VoxelTerrainPager::VoxelTerrainPager(uint32 NoiseSeed, uint32 Octaves, float Fre
 }
 
 // Called after the C++ constructor and after the properties have been initialized.
-
 void AAVoxelSomething::PostInitializeComponents()
 {
 	// Initialize our paged volume.
@@ -38,6 +42,57 @@ void AAVoxelSomething::PostInitializeComponents()
 	// Call the base class's function.
 	Super::PostInitializeComponents();
 }
+
+// Called when the actor has begun playing in the level
+void AAVoxelSomething::BeginPlay()
+{
+	// Extract the voxel mesh from PolyVox
+	PolyVox::Region ToExtract(Vector3DInt32(0, 0, 0), Vector3DInt32(127, 127, 63));
+	auto ExtractedMesh = extractCubicMesh(VoxelVolume.Get(), ToExtract);
+	auto DecodedMesh = decodeMesh(ExtractedMesh);
+
+	// Define variables to pass into the CreateMeshSection function
+	auto Vertices = TArray<FVector>();
+	auto Indices = TArray<int32>();
+	auto Normals = TArray<FVector>();
+	auto UV0 = TArray<FVector2D>();
+	auto Colors = TArray<FColor>();
+	auto Tangents = TArray<FProcMeshTangent>();
+
+	// Loop over all of the triangle vertex indices
+	for (uint32 i = 0; i < DecodedMesh.getNoOfIndices() - 2; i += 3)
+	{
+		// We need to add the vertices of each triangle in reverse or the mesh will be upside down
+		auto Index = DecodedMesh.getIndex(i + 2);
+		auto Vertex2 = DecodedMesh.getVertex(Index);
+		Indices.Add(Vertices.Add(FPolyVoxVector(Vertex2.position) * 100.f));
+
+		Index = DecodedMesh.getIndex(i + 1);
+		auto Vertex1 = DecodedMesh.getVertex(Index);
+		Indices.Add(Vertices.Add(FPolyVoxVector(Vertex1.position) * 100.f));
+
+		Index = DecodedMesh.getIndex(i);
+		auto Vertex0 = DecodedMesh.getVertex(Index);
+		Indices.Add(Vertices.Add(FPolyVoxVector(Vertex0.position) * 100.f));
+
+		// Calculate the tangents of our triangle
+		const FVector Edge01 = FPolyVoxVector(Vertex1.position - Vertex0.position);
+		const FVector Edge02 = FPolyVoxVector(Vertex2.position - Vertex0.position);
+
+		const FVector TangentX = Edge01.GetSafeNormal();
+		FVector TangentZ = (Edge01 ^ Edge02).GetSafeNormal();
+
+		for (int32 i = 0; i < 3; i++)
+		{
+			Tangents.Add(FProcMeshTangent(TangentX, false));
+			Normals.Add(TangentZ);
+		}
+	}
+
+	// Finally create the mesh
+	Mesh->CreateMeshSection(0, Vertices, Indices, Normals, UV0, Colors, Tangents, true);
+}
+
 
 // Called when a new chunk is paged in
 // This function will automatically generate our voxel-based terrain from simplex noise

@@ -5,6 +5,8 @@
 // Polyvox Includes
 #include "PolyVox/PagedVolume.h"
 #include "PolyVox/MaterialDensityPair.h"
+#include "PolyVox/Vector.h"
+#include "ProceduralMeshComponent.h"
 
 #include "GameFramework/Actor.h"
 #include "AVoxelSomething.generated.h"
@@ -20,6 +22,12 @@ public:
 
 	// Called after the C++ constructor and after the properties have been initialized.
 	virtual void PostInitializeComponents() override;
+
+	// Called when the actor has begun playing in the level
+	virtual void BeginPlay() override;
+
+	// The procedurally generated mesh that represents our voxels
+	UPROPERTY(Category = "Voxel Terrain", BlueprintReadWrite, VisibleAnywhere) class UProceduralMeshComponent* Mesh;
 
 	// Some variables to control our terrain generator
 	// The seed of our fractal
@@ -77,4 +85,40 @@ private:
 
 	// The maximum height of the generated terrain in voxels. NOTE: Changing this will affect where the ground begins!
 	float TerrainHeight = 64;
+};
+
+// Bridge between PolyVox Vector3DFloat and Unreal Engine 4 FVector
+struct FPolyVoxVector : public FVector
+{
+	FORCEINLINE FPolyVoxVector()
+	{}
+
+	explicit FORCEINLINE FPolyVoxVector(EForceInit E)
+		: FVector(E)
+	{}
+
+	FORCEINLINE FPolyVoxVector(float InX, float InY, float InZ)
+		: FVector(InX, InY, InX)
+	{}
+
+	FORCEINLINE FPolyVoxVector(const FVector &InVec)
+	{
+		FVector::operator=(InVec);
+	}
+
+	FORCEINLINE FPolyVoxVector(const PolyVox::Vector3DFloat &InVec)
+	{
+		FPolyVoxVector::operator=(InVec);
+	}
+
+	FORCEINLINE FVector& operator=(const PolyVox::Vector3DFloat& Other)
+	{
+		this->X = Other.getX();
+		this->Y = Other.getY();
+		this->Z = Other.getZ();
+
+		DiagnosticCheckNaN();
+
+		return *this;
+	}
 };
