@@ -96,7 +96,7 @@ void AAVoxelSomething::BeginPlay()
 
 // Called when a new chunk is paged in
 // This function will automatically generate our voxel-based terrain from simplex noise
-void VoxelTerrainPager::pageIn(const PolyVox::Region> region, PagedVolume<MaterialDensityPair44>::Chunk* Chunk)
+void VoxelTerrainPager::pageIn(const PolyVox::Region& region, PagedVolume<MaterialDensityPair44>::Chunk* Chunk)
 {
 	// This is our kernel. It is responsible for generating our noise.
 	CKernel NoiseKernel;
@@ -147,6 +147,6 @@ void VoxelTerrainPager::pageIn(const PolyVox::Region> region, PagedVolume<Materi
 }
 
 // Called when a chunk is paged out
-void VoxelTerrainPager::pageOut(const PolyVox::Region> region, PagedVolume<MaterialDensityPair44>::Chunk* Chunk)
+void VoxelTerrainPager::pageOut(const PolyVox::Region& region, PagedVolume<MaterialDensityPair44>::Chunk* Chunk)
 {
 }

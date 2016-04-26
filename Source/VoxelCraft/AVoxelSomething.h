@@ -63,8 +63,8 @@ public:
 	virtual ~VoxelTerrainPager() {};
 
 	// PagedVolume::Pager functions
-	virtual void pageIn(const PolyVox::Region> region, PolyVox::PagedVolume<PolyVox::MaterialDensityPair44>::Chunk* pChunk);
-	virtual void pageOut(const PolyVox::Region> region, PolyVox::PagedVolume<PolyVox::MaterialDensityPair44>::Chunk* pChunk);
+	virtual void pageIn(const PolyVox::Region& region, PolyVox::PagedVolume<PolyVox::MaterialDensityPair44>::Chunk* pChunk);
+	virtual void pageOut(const PolyVox::Region& region, PolyVox::PagedVolume<PolyVox::MaterialDensityPair44>::Chunk* pChunk);
 
 private:
 	// Some variables to control our terrain generator
