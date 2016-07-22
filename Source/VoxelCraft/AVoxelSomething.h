@@ -49,7 +49,7 @@ public:
 	UPROPERTY(Category = "Voxel Terrain", BlueprintReadWrite, EditAnywhere) float TerrainHeight;
 
 	// The material to apply to our voxel terrain
-	UPROPERTY(Category = "Voxel Terrain", BlueprintReadWrite, EditAnywhere) UMaterialInterface* TerrainMaterial;
+	UPROPERTY(Category = "Voxel Terrain", BlueprintReadWrite, EditAnywhere) TArray<UMaterialInterface*> TerrainMaterials;
 
 private:
 	TSharedPtr<PolyVox::PagedVolume<PolyVox::MaterialDensityPair44>> VoxelVolume;
